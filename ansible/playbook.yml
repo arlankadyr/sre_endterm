@@ -1,0 +1,41 @@
+---
+- name: Bootstrap ShopFlow on Terraform containers
+  hosts: shopflow_vms
+  become: yes
+
+  tasks:
+    - name: Install Docker (Alpine)
+      apk:
+        name: docker
+        state: present
+      when: ansible_os_family == "Alpine"
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Install Docker Compose standalone
+      get_url:
+        url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+      when: ansible_os_family == "Alpine"
+
+    - name: Create project directory
+      file:
+        path: /opt/shopflow
+        state: directory
+
+    - name: Copy entire ShopFlow project
+      synchronize:
+        src: ../
+        dest: /opt/shopflow
+        delete: no
+      delegate_to: localhost
+
+    - name: Deploy with docker-compose
+      docker_compose:
+        project_src: /opt/shopflow
+        state: present
