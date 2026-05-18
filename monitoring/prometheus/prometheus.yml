@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alerts.yml"
+  - "recording_rules.yml"
+
+scrape_configs:
+  - job_name: 'auth'
+    static_configs:
+      - targets: ['auth:8001']
+  - job_name: 'product'
+    static_configs:
+      - targets: ['product:8002']
+  - job_name: 'order'
+    static_configs:
+      - targets: ['order:8003']
+  - job_name: 'payment'
+    static_configs:
+      - targets: ['payment:8004']
+  - job_name: 'notification'
+    static_configs:
+      - targets: ['notification:8005']
+  - job_name: 'user-profile'
+    static_configs:
+      - targets: ['user-profile:8006']
