@@ -20,7 +20,7 @@ jobs:
           docker build -t shopflow/order ./services/order-service
           docker build -t shopflow/payment ./services/payment-service
           docker build -t shopflow/notification ./services/notification-service
-          docker build -t shopflow/user-profile ./services/user-profile-service
+          docker build -t shopflow/user-profile ./services/user-profile
 
       - name: Start services and smoke test
         run: |

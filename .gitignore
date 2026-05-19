@@ -1,0 +1,45 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary
+*.test
+
+# Output of go build
+/auth-service/auth
+/product-service/product
+/order-service/order
+/payment-service/payment
+/notification-service/notification
+/user-profile-service/user-profile
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS metadata
+.DS_Store
+Thumbs.db
+coffee_analytics/
+# Terraform state
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+
+# Ansible temp
+*.retry
+
+# Logs
+*.log
+
+# Environment files
+.env
+
+# Downloads
+hey.exe
