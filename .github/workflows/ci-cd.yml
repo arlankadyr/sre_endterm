@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build all microservices
+        run: |
+          docker build -t shopflow/auth ./services/auth-service
+          docker build -t shopflow/product ./services/product-service
+          docker build -t shopflow/order ./services/order-service
+          docker build -t shopflow/payment ./services/payment-service
+          docker build -t shopflow/notification ./services/notification-service
+          docker build -t shopflow/user-profile ./services/user-profile-service
+
+      - name: Start services and smoke test
+        run: |
+          docker-compose up -d
+          sleep 30
+          curl --fail http://localhost:8001/health
+          curl --fail http://localhost:8002/health
+          curl --fail http://localhost:8003/health
+          docker-compose down
