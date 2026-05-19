@@ -24,9 +24,9 @@ jobs:
 
       - name: Start services and smoke test
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 30
           curl --fail http://localhost:8001/health
           curl --fail http://localhost:8002/health
           curl --fail http://localhost:8003/health
-          docker-compose down
+          docker compose down
