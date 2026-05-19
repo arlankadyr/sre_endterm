@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopFlow - e-commerce</title>
+  <script>
+    fetch('styles.css', { cache: 'no-store' })
+      .then((response) => response.text())
+      .then((css) => {
+        const style = document.createElement('style');
+        style.textContent = css;
+        document.head.appendChild(style);
+      })
+      .catch(() => {});
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#catalog" data-route="catalog" aria-label="ShopFlow">
+      <span class="brand-mark">SF</span>
+      <span>
+        <strong>ShopFlow</strong>
+        <small>e-commerce</small>
+      </span>
+    </a>
+
+    <nav class="nav-tabs" aria-label="Основная навигация">
+      <button class="nav-tab active" type="button" data-route="catalog">
+        <i data-lucide="store"></i>
+        Каталог
+      </button>
+      <button class="nav-tab" type="button" data-route="cart">
+        <i data-lucide="shopping-cart"></i>
+        Корзина
+      </button>
+      <button class="nav-tab auth-only hidden" type="button" data-route="orders">
+        <i data-lucide="receipt-text"></i>
+        Заказы
+      </button>
+      <button class="nav-tab auth-only hidden" type="button" data-route="profile">
+        <i data-lucide="user-round"></i>
+        Профиль
+      </button>
+      <button class="nav-tab admin-only hidden" type="button" data-route="admin">
+        <i data-lucide="layout-dashboard"></i>
+        Админ
+      </button>
+    </nav>
+
+    <div class="top-actions">
+      <button class="user-chip hidden" type="button" id="userChip" data-route="profile">
+        <span id="userInitial">U</span>
+        <span id="userEmail">user</span>
+      </button>
+      <button class="button secondary" type="button" id="openAuthBtn">
+        <i data-lucide="log-in"></i>
+        Войти
+      </button>
+      <button class="icon-button hidden" type="button" id="logoutBtn" aria-label="Выйти" title="Выйти">
+        <i data-lucide="log-out"></i>
+      </button>
+      <button class="cart-button" type="button" id="cartButton" data-route="cart">
+        <i data-lucide="shopping-bag"></i>
+        <span id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="storefront">
+      <div class="storefront-copy">
+        <p class="eyebrow">Live shop workspace</p>
+        <h1>Каталог, корзина, оплата и роли в одном интерфейсе.</h1>
+      </div>
+      <div class="storefront-stats" aria-label="Статистика магазина">
+        <article>
+          <span>Товаров</span>
+          <strong id="statProducts">0</strong>
+        </article>
+        <article>
+          <span>В корзине</span>
+          <strong id="statCart">0</strong>
+        </article>
+        <article>
+          <span>Сессия</span>
+          <strong id="statSession">Гость</strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="page-section active" id="catalogPage" data-page="catalog">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Shop</p>
+          <h2>Товары</h2>
+        </div>
+        <div class="toolbar">
+          <label class="search-box">
+            <i data-lucide="search"></i>
+            <input id="searchInput" type="search" placeholder="Поиск товара">
+          </label>
+          <select id="categoryFilter" aria-label="Фильтр по категории">
+            <option value="all">Все категории</option>
+          </select>
+        </div>
+      </div>
+      <div class="product-grid" id="productsContainer"></div>
+      <p class="empty-state hidden" id="productsEmpty">Пока нет товаров. Админ может добавить их в панели управления.</p>
+    </section>
+
+    <section class="page-section" id="cartPage" data-page="cart">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Cart</p>
+          <h2>Корзина</h2>
+        </div>
+        <button class="button ghost" type="button" id="clearCartBtn">
+          <i data-lucide="trash-2"></i>
+          Очистить
+        </button>
+      </div>
+      <div class="cart-layout">
+        <div class="cart-list" id="cartItems"></div>
+        <aside class="checkout-panel">
+          <p class="eyebrow">Итого</p>
+          <div class="checkout-total">
+            <span>Сумма</span>
+            <strong id="cartTotal">0 ₸</strong>
+          </div>
+          <div class="checkout-meta">
+            <span>Оплата</span>
+            <strong>Карта / demo</strong>
+          </div>
+          <button class="button primary full" type="button" id="checkoutBtn">
+            <i data-lucide="credit-card"></i>
+            Оплатить заказ
+          </button>
+        </aside>
+      </div>
+      <p class="empty-state hidden" id="cartEmpty">Корзина пустая. Добавьте товар из каталога.</p>
+    </section>
+
+    <section class="page-section" id="ordersPage" data-page="orders">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Orders</p>
+          <h2>Мои заказы</h2>
+        </div>
+        <button class="button ghost" type="button" id="refreshOrdersBtn">
+          <i data-lucide="refresh-cw"></i>
+          Обновить
+        </button>
+      </div>
+      <div class="orders-grid" id="ordersContainer"></div>
+      <p class="empty-state hidden" id="ordersEmpty">Заказов пока нет.</p>
+    </section>
+
+    <section class="page-section" id="profilePage" data-page="profile">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Profile</p>
+          <h2>Профиль пользователя</h2>
+        </div>
+      </div>
+      <form class="profile-form" id="profileForm">
+        <label>
+          Email
+          <input id="profileEmail" type="email" readonly>
+        </label>
+        <label>
+          Имя
+          <input id="profileName" type="text" placeholder="Например, Арлан">
+        </label>
+        <label>
+          Телефон
+          <input id="profilePhone" type="tel" placeholder="+7 777 000 00 00">
+        </label>
+        <label class="span-2">
+          Адрес доставки
+          <input id="profileAddress" type="text" placeholder="Город, улица, дом">
+        </label>
+        <button class="button primary" type="submit">
+          <i data-lucide="save"></i>
+          Сохранить профиль
+        </button>
+      </form>
+    </section>
+
+    <section class="page-section" id="adminPage" data-page="admin">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Admin</p>
+          <h2>Панель управления</h2>
+        </div>
+        <button class="button primary" type="button" id="newProductBtn">
+          <i data-lucide="plus"></i>
+          Новый товар
+        </button>
+      </div>
+
+      <div class="admin-summary">
+        <article>
+          <span>Товаров</span>
+          <strong id="adminProductCount">0</strong>
+        </article>
+        <article>
+          <span>Заказов</span>
+          <strong id="adminOrderCount">0</strong>
+        </article>
+        <article>
+          <span>Выручка</span>
+          <strong id="adminRevenue">0 ₸</strong>
+        </article>
+      </div>
+
+      <form class="admin-form hidden" id="productForm">
+        <input type="hidden" id="productId">
+        <label>
+          Название
+          <input id="productName" type="text" required placeholder="Premium Hoodie">
+        </label>
+        <label>
+          Категория
+          <input id="productCategory" type="text" required placeholder="Одежда">
+        </label>
+        <label>
+          Цена
+          <input id="productPrice" type="number" min="1" step="1" required placeholder="19900">
+        </label>
+        <label>
+          Остаток
+          <input id="productStock" type="number" min="0" step="1" required placeholder="24">
+        </label>
+        <label class="span-2">
+          Ссылка на картинку
+          <input id="productImage" type="url" placeholder="https://images.unsplash.com/...">
+        </label>
+        <label class="span-2">
+          Описание
+          <textarea id="productDescription" required placeholder="Короткое описание товара"></textarea>
+        </label>
+        <div class="form-actions span-2">
+          <button class="button primary" type="submit">
+            <i data-lucide="save"></i>
+            Сохранить
+          </button>
+          <button class="button ghost" type="button" id="cancelProductBtn">
+            <i data-lucide="x"></i>
+            Отмена
+          </button>
+        </div>
+      </form>
+
+      <div class="admin-split">
+        <div>
+          <h3>Товары</h3>
+          <div class="admin-list" id="adminProducts"></div>
+        </div>
+        <div>
+          <h3>Заказы</h3>
+          <div class="admin-list" id="adminOrders"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal hidden" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+    <div class="modal-panel">
+      <button class="icon-button modal-close" type="button" id="closeAuthBtn" aria-label="Закрыть">
+        <i data-lucide="x"></i>
+      </button>
+      <p class="eyebrow">Account</p>
+      <h2 id="authTitle">Вход</h2>
+      <div class="segmented">
+        <button class="active" type="button" data-auth-mode="login">Войти</button>
+        <button type="button" data-auth-mode="register">Регистрация</button>
+      </div>
+      <form id="authForm" class="auth-form">
+        <label>
+          Email
+          <input id="authEmail" type="email" autocomplete="email" required placeholder="user@test.com">
+        </label>
+        <label>
+          Пароль
+          <input id="authPassword" type="password" autocomplete="current-password" required placeholder="123">
+        </label>
+        <button class="button primary full" type="submit" id="authSubmitBtn">
+          <i data-lucide="log-in"></i>
+          Войти
+        </button>
+      </form>
+      <div class="quick-login">
+        <button type="button" data-fill-user>
+          <i data-lucide="user"></i>
+          user@test.com
+        </button>
+        <button type="button" data-fill-admin>
+          <i data-lucide="shield-check"></i>
+          admin@shop.com
+        </button>
+      </div>
+      <p class="form-note" id="authHint">Админ по умолчанию: admin@shop.com / admin123</p>
+    </div>
+  </div>
+
+  <div class="modal hidden" id="paymentModal" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+    <div class="modal-panel payment-panel">
+      <button class="icon-button modal-close" type="button" id="closePaymentBtn" aria-label="Закрыть">
+        <i data-lucide="x"></i>
+      </button>
+      <p class="eyebrow">Payment</p>
+      <h2 id="paymentTitle">Оплата заказа</h2>
+      <div class="card-preview">
+        <span>ShopFlow Card</span>
+        <strong>•••• 4242</strong>
+      </div>
+      <div class="checkout-total">
+        <span>К оплате</span>
+        <strong id="paymentTotal">0 ₸</strong>
+      </div>
+      <button class="button primary full" type="button" id="confirmPaymentBtn">
+        <i data-lucide="check-circle"></i>
+        Подтвердить оплату
+      </button>
+    </div>
+  </div>
+
+  <div class="toast hidden" id="toast" role="status"></div>
+</body>
+</html>
