@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  namespace: shopflow
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+  template:
+    metadata:
+      labels:
+        app: auth
+    spec:
+      containers:
+      - name: auth
+        image: shopflow/auth:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8001
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: shopflow-config
+              key: DATABASE_URL
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: shopflow-config
+              key: JWT_SECRET
+        - name: PORT
+          value: "8001"

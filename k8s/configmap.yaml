@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopflow-config
+  namespace: shopflow
+data:
+  DATABASE_URL: "host=postgres user=shopflow password=shopflow dbname=shopflow port=5432 sslmode=disable"
+  JWT_SECRET: "supersecret"
